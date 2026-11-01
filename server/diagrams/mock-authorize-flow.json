@@ -1,0 +1,124 @@
+{
+  "schema": "diagram-studio/1",
+  "id": "mock-authorize-flow",
+  "title": "Mock Authorize: how a client gets a decision",
+  "lede": "A client gets a worker token, asks for a decision, and the rules you edit answer it. The same answer shape as PingOne.",
+  "groups": {
+    "client": {
+      "label": "Caller",
+      "color": "dark"
+    },
+    "server": {
+      "label": "Mock Authorize",
+      "color": "grey"
+    },
+    "log": {
+      "label": "Record",
+      "color": "blue"
+    }
+  },
+  "nodes": [
+    {
+      "id": "client",
+      "group": "client",
+      "label": "A client",
+      "sub": [
+        "The P1AZ Inspector (Real, cloud), or your own code"
+      ],
+      "x": 0,
+      "y": 140
+    },
+    {
+      "id": "token",
+      "group": "server",
+      "label": "Token endpoint",
+      "sub": [
+        "Worker credentials in, a worker token out"
+      ],
+      "x": 300,
+      "y": 20
+    },
+    {
+      "id": "decide",
+      "group": "server",
+      "label": "Decision endpoint",
+      "sub": [
+        "Needs the worker token"
+      ],
+      "x": 300,
+      "y": 260
+    },
+    {
+      "id": "rules",
+      "group": "server",
+      "label": "Rules and engine",
+      "sub": [
+        "Your editable policy decides"
+      ],
+      "x": 620,
+      "y": 260
+    },
+    {
+      "id": "log",
+      "group": "log",
+      "label": "Decision log",
+      "sub": [
+        "Shown on the Decisions page"
+      ],
+      "x": 940,
+      "y": 260
+    }
+  ],
+  "edges": [
+    {
+      "source": "client",
+      "target": "token",
+      "label": "1 worker credentials"
+    },
+    {
+      "source": "client",
+      "target": "decide",
+      "label": "2 decision request"
+    },
+    {
+      "source": "decide",
+      "target": "rules",
+      "label": "3 evaluate"
+    },
+    {
+      "source": "rules",
+      "target": "log",
+      "label": "4 record"
+    }
+  ],
+  "steps": [
+    {
+      "title": "A client gets a token",
+      "what": "The client sends its worker client ID and secret and gets a worker token, as it would from PingOne. The secret is never shown back.",
+      "edges": [
+        0
+      ]
+    },
+    {
+      "title": "A client asks for a decision",
+      "what": "It posts the decision request with that token. Without a valid token the answer is 401.",
+      "edges": [
+        1
+      ]
+    },
+    {
+      "title": "The rules decide",
+      "what": "The engine reads your saved rules and answers in PingOne's shape: a decision, statements, and a correlation ID.",
+      "edges": [
+        2
+      ]
+    },
+    {
+      "title": "The decision is recorded",
+      "what": "It shows on the Decisions page as API. Edit a rule and ask again to watch the answer change.",
+      "edges": [
+        3
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# OrbStack:  HOST_PORT=4850 docker compose up --build -d   ->  http://127.0.0.1:4850
+# The server binds 0.0.0.0 INSIDE the container (MOCKAZ_BIND is the opt-in, set in the Dockerfile), but the port is
+# published on loopback only. Do not change the 127.0.0.1 below. HOST_PORT must stay in 4850-4851.
+name: mock-authorize-lab
+
+services:
+  mock-authorize-lab:
+    build: .
+    ports:
+      - "127.0.0.1:${HOST_PORT:-4850}:4850"
+    environment:
+      PORT: "4850"
+      # The browser's Host header is 127.0.0.1:HOST_PORT; the Host check compares names only, so any HOST_PORT works.
+    volumes:
+      - mock-authorize-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+volumes:
+  mock-authorize-data:

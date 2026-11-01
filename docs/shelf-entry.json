@@ -1,0 +1,16 @@
+{
+  "demos": [
+    {
+      "id": "mock-authorize",
+      "name": "Mock Authorize LAB",
+      "catalogId": "G4",
+      "kind": "Tester",
+      "description": "A local stand-in for PingOne Authorize: editable rules, a Try page, a decision log, and a PingOne-shaped token, decision and recent-decisions API that clients like the P1AZ Inspector can call. Simulated.",
+      "url": "http://localhost:4850",
+      "healthPath": "/api/health",
+      "composeFile": "mock-authorize-LAB/docker-compose.yml",
+      "composeOverlays": [],
+      "notes": "Host-run: npm start (port 4850). Docker: HOST_PORT=4850 docker compose up --build -d (published on 127.0.0.1 only). Mock is the only mode; there is no live mode. Point the P1AZ Inspector's Live mode at http://127.0.0.1:4850/pingone (see Connect)."
+    }
+  ]
+}

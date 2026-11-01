@@ -1,0 +1,22 @@
+[
+  {
+    "id": "S01",
+    "title": "Set the rules",
+    "say": "Open Rules. Lower the deny limit, add a tool that is never allowed, and save. The next decision follows the change; no restart, no tenant."
+  },
+  {
+    "id": "S02",
+    "title": "Try a request",
+    "say": "On Try, send a transaction or an MCP tool call and read the verdict, the statements and PingOne's answer. A gate such as step-up is a permit plus a statement that names it."
+  },
+  {
+    "id": "S03",
+    "title": "Point a client at it",
+    "say": "Connect shows the base URL and the mock worker credentials. A client gets a token, calls the decision endpoint and its call appears on Decisions marked API next to your own."
+  },
+  {
+    "id": "S04",
+    "title": "Start over",
+    "say": "Reset session restores the default rules, clears the decision log and ends issued tokens. The worker credentials stay, so a client that has the secret still works."
+  }
+]

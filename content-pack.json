@@ -1,0 +1,154 @@
+{
+  "schema": "demo-content-pack/1",
+  "id": "mock-authorize",
+  "title": "Mock Authorize LAB",
+  "version": "0.1.0",
+  "demo": {
+    "id": "mock-authorize",
+    "name": "Mock Authorize LAB",
+    "catalog": "G4",
+    "baseUrl": "http://localhost:4850",
+    "doctor": "/api/health",
+    "tags": [
+      "pingone-authorize",
+      "decision",
+      "mock",
+      "tester"
+    ]
+  },
+  "glossary": [
+    {
+      "id": "decision",
+      "term": "Decision (verdict)",
+      "definition": "What the rules said about one request: PERMIT, DENY, or INDETERMINATE (the request had nothing the rules can read). INDETERMINATE is shown as such and is never read as a permit."
+    },
+    {
+      "id": "mock-authorize",
+      "term": "Mock Authorize",
+      "definition": "A local stand-in for PingOne Authorize. It answers decision requests in the same shape from rules you can edit, so a client can run its normal flow with no tenant. It is a simulation: its verdicts are not PingOne's. The response shapes follow the AI-DEMO2 integration and are UNVERIFIED against PingOne's own documentation."
+    },
+    {
+      "id": "netguard",
+      "term": "Netguard",
+      "definition": "A guard that refuses every outbound socket, DNS lookup, fetch, UDP send and UDP connect. This app only answers requests; it never calls out. A self-test proves the guard works and a test proves a whole session makes zero attempts."
+    },
+    {
+      "id": "pingone-shaped-api",
+      "term": "PingOne-shaped API",
+      "definition": "The token, decisionEndpoints, decision and recentDecisions routes under /pingone, with the environment id in the path accepted as given. A client such as the P1AZ Inspector in Real mode can point at it unchanged. The on-prem PingAuthorize path is also answered. Both shapes are UNVERIFIED against a real PingOne or PingAuthorize."
+    },
+    {
+      "id": "reset",
+      "term": "Reset",
+      "definition": "Puts the session back to a fresh start: rules back to defaults, the decision log cleared, issued tokens ended. The worker credentials are kept, so a client that already holds the secret keeps working."
+    },
+    {
+      "id": "rules",
+      "term": "Rules",
+      "definition": "The editable knobs the Mock engine decides with: the deny limit, the step-up limit, the transaction types that always need consent, the MCP tools that are never allowed and the tools that need a person's approval. Saved rules are a sparse overlay on the defaults; a value set back to its default is dropped."
+    },
+    {
+      "id": "statements",
+      "term": "Statements",
+      "definition": "The named reasons that come back with a verdict. A gate such as step-up, consent or human approval is a PERMIT plus a statement whose code names it (STEP_UP_MFA, HITL_CONSENT), as PingOne's endpoint signals it (UNVERIFIED)."
+    },
+    {
+      "id": "worker-token",
+      "term": "Worker token",
+      "definition": "A client_credentials access token a client gets from the mock token endpoint with the mock worker client id and secret. It is Mock-issued, labelled as such, and only good here. Reset ends every token issued so far."
+    }
+  ],
+  "sources": [],
+  "cards": [
+    {
+      "id": "connect",
+      "label": "Point a client at the mock",
+      "description": "The base URL and the mock worker credentials, ready to paste into a PingOne-shaped client.",
+      "group": "setup",
+      "terms": [
+        "worker-token",
+        "pingone-shaped-api",
+        "reset",
+        "netguard"
+      ],
+      "story": "S03",
+      "action": {
+        "type": "route",
+        "href": "/#connect"
+      }
+    },
+    {
+      "id": "flow",
+      "label": "How a decision travels",
+      "description": "Client, token, decision endpoint, rules and verdict as a movable diagram with Simulate.",
+      "group": "concept",
+      "terms": [
+        "pingone-shaped-api"
+      ],
+      "story": "S04",
+      "action": {
+        "type": "route",
+        "href": "/#diagram"
+      }
+    },
+    {
+      "id": "rules",
+      "label": "Edit the rules",
+      "description": "Change the deny limit, the step-up limit and the tool lists. The next decision follows.",
+      "group": "setup",
+      "terms": [
+        "rules",
+        "mock-authorize"
+      ],
+      "story": "S01",
+      "action": {
+        "type": "route",
+        "href": "/#rules"
+      }
+    },
+    {
+      "id": "try",
+      "label": "Send a request and read the verdict",
+      "description": "Send a transaction or an MCP tool call and see the verdict, the statements and the exact answer.",
+      "group": "try-it",
+      "terms": [
+        "decision",
+        "statements"
+      ],
+      "story": "S02",
+      "action": {
+        "type": "route",
+        "href": "/#try"
+      }
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "flow",
+      "label": "How a decision travels",
+      "href": "/#diagram"
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "title": "Set the rules",
+      "say": "Open Rules. Lower the deny limit, add a tool that is never allowed, and save. The next decision follows the change; no restart, no tenant."
+    },
+    {
+      "id": "S02",
+      "title": "Try a request",
+      "say": "On Try, send a transaction or an MCP tool call and read the verdict, the statements and PingOne's answer. A gate such as step-up is a permit plus a statement that names it."
+    },
+    {
+      "id": "S03",
+      "title": "Point a client at it",
+      "say": "Connect shows the base URL and the mock worker credentials. A client gets a token, calls the decision endpoint and its call appears on Decisions marked API next to your own."
+    },
+    {
+      "id": "S04",
+      "title": "Start over",
+      "say": "Reset session restores the default rules, clears the decision log and ends issued tokens. The worker credentials stay, so a client that has the secret still works."
+    }
+  ]
+}

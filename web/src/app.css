@@ -1,0 +1,83 @@
+/* App layout only. Colours, fonts, controls and the dark theme come from styles/standalone-ui.css (loaded first). Tokens only here:
+   no colour literals, no dark-mode media queries, no forced priority, breakpoints 600px and 900px only. */
+.app { max-width: 1216px; margin: 0 auto; padding: 0 0 32px; }
+.page { padding: 8px 0 16px; }
+h1 { margin: 0; font-size: 20px; }
+h2 { margin: 8px 0 4px; font-size: 22px; }
+h3 { margin: 16px 0 8px; font-size: 17px; }
+h4 { margin: 8px 0 4px; font-size: 15px; color: var(--text); }
+a { color: var(--focus); font-weight: 600; }
+code { font-size: 13px; overflow-wrap: anywhere; }
+.lede, .muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+.skip { position: absolute; left: -999px; top: 0; padding: 8px 16px; background: var(--surface); color: var(--text); border: 2px solid var(--accent); z-index: 50; }
+.skip:focus { left: 8px; top: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.top__tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
+.top nav { display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 224px; }
+.top nav a { padding: 6px 12px; border-radius: 8px; color: var(--text); text-decoration: none; border: 1px solid transparent; }
+.top nav a[aria-current="page"] { border-color: var(--accent); }
+.theme { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.chip { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 12px; font-weight: 700; }
+
+button[aria-disabled="true"] { opacity: 0.75; cursor: not-allowed; }
+input:not([type="checkbox"]), textarea { width: 100%; }
+select { max-width: 100%; }
+input[type="checkbox"] { width: 20px; height: 20px; min-height: 0; accent-color: var(--accent); }
+textarea { font-family: var(--font-mono); font-size: 13px; }
+
+.card { padding: 14px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); min-width: 0; }
+.alert { padding: 8px 12px; border-radius: 8px; background: var(--accent-soft); color: var(--danger-text); border: 1px solid var(--danger-text); overflow-wrap: anywhere; }
+.ok { padding: 8px 12px; border-radius: 8px; background: var(--surface-2); color: var(--status-ok); border: 1px solid var(--status-ok); }
+.controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 20px; }
+.controls label, .fields label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 224px), 1fr)); gap: 12px; margin: 12px 0; }
+.fields > * { min-width: 0; }
+.fields label.check { flex-direction: row; align-items: center; gap: 8px; color: var(--text); }
+
+.engine { display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; border: 1px solid currentcolor; background: var(--surface-2); }
+.engine--mock { color: var(--status-info); }
+.engine--live { color: var(--status-ok); }
+.fields .engine { align-self: flex-start; }
+.verdict { display: inline-block; padding: 1px 12px; border-radius: 999px; font-weight: 700; border: 1px solid currentcolor; background: var(--surface-2); }
+.verdict--permit { color: var(--status-ok); }
+.verdict--deny { color: var(--danger-text); }
+.verdict--step_up, .verdict--consent, .verdict--other, .verdict--indeterminate { color: var(--status-warn); }
+
+.split { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.calls { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.calls button { width: 100%; text-align: left; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.calls button[aria-current="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+pre { margin: 4px 0 12px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); font-size: 13px; overflow: auto; max-height: 288px; }
+.kv { border-collapse: collapse; width: 100%; }
+.kv th { text-align: left; font-weight: 700; color: var(--text); white-space: nowrap; padding: 6px 16px 6px 0; vertical-align: top; }
+.kv td { padding: 6px 0; overflow-wrap: anywhere; }
+.stmts { padding-left: 18px; margin: 4px 0 12px; }
+
+.presenter-say { border: 1px solid var(--status-info); background: var(--surface-2); color: var(--text); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
+.presenter-say p { margin: 0; line-height: 1.5; }
+.app[data-presenter="on"] { font-size: 18px; }
+.app[data-presenter="on"] .presenter-say { font-size: 20px; }
+.app[data-presenter="on"] .lede, .app[data-presenter="on"] .muted, .app[data-presenter="on"] .small { font-size: 16px; }
+
+.flow-wrap { height: min(480px, 70vh); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.flow-wrap .react-flow { --xy-background-color-default: var(--surface); --xy-edge-stroke-default: var(--muted); --xy-edge-label-background-color-default: var(--surface); --xy-edge-label-color-default: var(--text); --xy-controls-button-background-color-default: var(--surface); --xy-controls-button-color-default: var(--text); --xy-controls-button-border-color-default: var(--border); --xy-controls-button-background-color-hover-default: var(--surface-2); --xy-background-pattern-dots-color-default: var(--border); }
+.flow-wrap .react-flow__arrowhead polyline { stroke: var(--muted); fill: var(--muted); }
+.flow-wrap .react-flow__controls-button svg { fill: currentcolor; }
+.caption { min-height: 48px; padding: 10px 12px; border-left: 4px solid var(--accent); background: var(--surface); color: var(--text); }
+.fbox { width: 200px; padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; background: var(--box-dark); color: var(--on-box); font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+.fbox[data-color="blue"] { background: var(--box-blue); }
+.fbox[data-color="grey"] { background: var(--box-grey); }
+.fbox[data-color="red"] { background: var(--box-red); }
+.fbox strong { font-size: 14px; }
+.fbox__group { font-size: 12px; }
+.fbox[data-on="true"] { box-shadow: 0 0 0 3px var(--focus); }
+.fbox[data-dim="true"] { opacity: 0.6; }
+.react-flow__edge.edge-on path.react-flow__edge-path { stroke: var(--accent); stroke-width: 3; }
+
+@media (max-width: 900px) { .split { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .flow-wrap { height: 384px; } .top__tools { margin-left: 0; } }
