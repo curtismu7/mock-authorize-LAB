@@ -95,10 +95,10 @@ export function createApp({
   api.post('/worker/rotate', small, (req, res) => res.json(req.ws.worker.rotate()));
 
   api.use((req, res) => bad(res, 'no such endpoint', 404, 'not_found'));
+  app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
   app.use('/api', api);
 
   if (fs.existsSync(WEB_DIST)) {
-app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
     app.use(express.static(WEB_DIST));
     app.get(/^\/(?!api\/|pingone\/|governance\/).*/, (req, res) => res.sendFile(path.join(WEB_DIST, 'index.html')));
   }
