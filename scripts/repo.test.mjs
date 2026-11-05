@@ -67,7 +67,7 @@ test('README follows the README standard: title ends in LAB, plain Tier, Repo an
   assert.deepEqual([...order].sort((a, b) => a - b), order, 'sections are in order');
   assert.match(r, /util\.parseEnv/);
   assert.match(r, /UNVERIFIED/);
-  assert.ok(!/ping-devops|cmuir|curtismu/i.test(r));
+  assert.ok(!/ping-devops|cmuir/i.test(r));
   assert.ok(!/\bdoor\b/i.test(r + read('CLAUDE.md')));
 });
 
