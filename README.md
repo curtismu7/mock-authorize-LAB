@@ -3,7 +3,7 @@
 A stand-in for PingOne Authorize that runs on your machine: it answers decision requests in PingOne's shape from rules you can edit, so an app (the P1AZ Inspector in Live mode, a demo, your own code) can run its normal PingOne flow with no tenant.
 
 Tier: Tester
-Repo: https://github.com/ping-sandbox/mock-authorize-LAB
+Repo: https://github.com/curtismu7/mock-authorize-LAB
 Catalog: G4
 
 **Tier: Tester.** Catalog G4 (Mock Authorize server) is the owner-assigned id this app has always carried; the demo-shelf catalog lists the G4 row as retired, which is an open owner decision (see "Not done"). Standalone: nothing here imports from another repo. The rule knobs and the answer shape follow AI-DEMO2's `demo_authz_server` and PingOne's decision endpoint, and are UNVERIFIED against a real PingOne or PingAuthorize.
@@ -49,7 +49,7 @@ Binds `127.0.0.1` only; any other address needs `MOCKAZ_BIND` (the container set
 Prerequisites: Node 26 or newer. Docker only if you use the Docker form. Mock mode works with no setup at all: no tenant, no credentials, no settings file.
 
 ```
-git clone https://github.com/ping-sandbox/mock-authorize-LAB.git
+git clone https://github.com/curtismu7/mock-authorize-LAB.git
 cd mock-authorize-LAB
 npm ci
 npm run build
