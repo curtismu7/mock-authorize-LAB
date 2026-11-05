@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ShelfLink from "./components/ShelfLink.jsx";
 import Connect from "./pages/Connect.jsx";
 import Decisions from "./pages/Decisions.jsx";
 import Diagram from "./pages/Diagram.jsx";
@@ -74,6 +75,7 @@ export default function App() {
           ))}
         </nav>
         <div className="top__tools">
+            <ShelfLink />
           <div className="seg" role="group" aria-label="Mode">
             <button type="button" aria-pressed={mode === "mock"} onClick={() => pickMode("mock")}>Mock</button>
             <button type="button" aria-pressed={false} onClick={() => pickMode("live")}>Live</button>

@@ -19,6 +19,7 @@ import { DEFAULT_RULES } from './rules.js';
 import { hostCheck, sameOriginWrites } from './security.js';
 import { tooDeep, traceparentFrom } from './limits.js';
 import { createWorkspaces } from './workspaces.js';
+import { shelfInfo } from './shelfLink.js';
 
 const WEB_DIST = process.env.WEB_DIST || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../web/dist');
 const bad = (res, message, status = 400, error = 'bad_request') => res.status(status).json({ error, message });
@@ -97,6 +98,7 @@ export function createApp({
   app.use('/api', api);
 
   if (fs.existsSync(WEB_DIST)) {
+app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
     app.use(express.static(WEB_DIST));
     app.get(/^\/(?!api\/|pingone\/|governance\/).*/, (req, res) => res.sendFile(path.join(WEB_DIST, 'index.html')));
   }
