@@ -57,7 +57,7 @@ test('README follows the README standard: title ends in LAB, plain Tier, Repo an
   const r = read('README.md');
   assert.match(r.split('\n')[0], /^# .* LAB$/);
   assert.match(r, /^Tier: Tester$/m);
-  assert.match(r, /^Repo: https:\/\/github\.com\/ping-sandbox\/mock-authorize-LAB$/m);
+  assert.match(r, /^Repo: https:\/\/github.com/curtismu7\/mock-authorize-LAB$/m);
   assert.match(r, /^Catalog: G4$/m);
   assert.match(r, /lsof -iTCP:4850 -sTCP:LISTEN -n -P/);
   assert.match(r, /PORT=<other port> npm start/);
