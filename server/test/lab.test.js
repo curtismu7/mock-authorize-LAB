@@ -51,11 +51,34 @@ test('settings: a real environment variable wins over the file, and STANDALONE_E
   assert.equal(env.MOCKAZ_LAB_MODE, 'mock');
 });
 
-test('GET /api/info says mock, simulated, and that there is no live mode', async () => {
+test('GET /api/info says mock, simulated, and carries the rule-19 toggle shape with an honest realReason', async () => {
   const t = await boot();
   try {
     const info = await (await fetch(`${t.base}/api/info`)).json();
-    assert.deepEqual(info, { mode: 'mock', simulated: true, live: false, liveMessage: LIVE_REFUSAL });
+    assert.deepEqual(info, { mode: 'mock', source: 'mock', realAvailable: false, realReason: LIVE_REFUSAL, simulated: true, live: false, liveMessage: LIVE_REFUSAL });
+  } finally { await t.close(); }
+});
+
+test('rule 19: POST /api/mode takes exactly {source}, refuses real with 409 and the honest reason, and never changes the mode', async () => {
+  const t = await boot();
+  try {
+    const postMode = (body) => fetch(`${t.base}/api/mode`, { method: 'POST', headers: { 'content-type': 'application/json', origin: t.base }, body: JSON.stringify(body) });
+    const mock = await postMode({ source: 'mock' });
+    assert.equal(mock.status, 200);
+    assert.deepEqual(await mock.json(), { mode: 'mock', source: 'mock', realAvailable: false, realReason: LIVE_REFUSAL });
+    const real = await postMode({ source: 'real' });
+    assert.equal(real.status, 409);
+    const rj = await real.json();
+    assert.equal(rj.error, 'real_not_available');
+    assert.equal(rj.message, LIVE_REFUSAL);
+    assert.equal(rj.source, 'mock');
+    assert.equal((await (await fetch(`${t.base}/api/info`)).json()).source, 'mock', 'a refused switch leaves the mode unchanged');
+    for (const body of [{ source: 'live' }, { source: 1 }, { source: null }, {}, { source: 'mock', extra: 1 }, { mode: 'mock' }, []]) {
+      const r = await postMode(body);
+      assert.equal(r.status, 400, JSON.stringify(body));
+    }
+    assert.equal((await fetch(`${t.base}/api/mode`, { method: 'POST', headers: { 'content-type': 'application/json', origin: t.base } })).status, 400);
+    assert.equal((await fetch(`${t.base}/api/mode`)).status, 404, 'there is one toggle endpoint, POST /api/mode');
   } finally { await t.close(); }
 });
 

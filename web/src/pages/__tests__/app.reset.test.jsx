@@ -14,7 +14,8 @@ function fakeServer() {
     const ok = (data) => ({ ok: true, status: 200, json: async () => data });
     if (url === "/api/reset") return resetOk ? ok({ ok: true, cleared: ["rules", "decisions", "tokens"], kept: ["worker credentials"] }) : { ok: false, status: 502, json: async () => ({}) };
     if (url === "/api/rules") return ok({ rules: { denyAmountUsd: 2000, stepUpAmountUsd: 500, consentTypes: [], denyTools: [], hitlTools: [] }, defaults: {}, edited: [] });
-    if (url === "/api/info") return ok({ mode: "mock", simulated: true, live: false, liveMessage: "Live mode is not available: test." });
+    if (url === "/api/info") return ok({ mode: "mock", source: "mock", realAvailable: false, realReason: "Live mode is not available: test.", simulated: true, live: false, liveMessage: "Live mode is not available: test." });
+    if (url === "/api/mode") return { ok: false, status: 409, json: async () => ({ error: "real_not_available", message: "Live mode is not available: test.", source: "mock" }) };
     if (url === "/api/decisions") return ok({ decisions: [] });
     if (url.startsWith("/api/diagram")) return ok(flow);
     if (url === "/api/config") return ok({ endpoints: [{ id: "mock-transaction" }, { id: "mock-mcp" }], pingonePath: "/pingone" });
@@ -67,19 +68,23 @@ describe("Mock | Live toggle (header, every page)", () => {
       await userEvent.click(screen.getByRole("link", { name }));
       const group = screen.getByRole("group", { name: "Mode" });
       expect(within(group).getByRole("button", { name: "Mock" })).toHaveAttribute("aria-pressed", "true");
-      expect(within(group).getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "false");
+      expect(within(group).getByRole("button", { name: "Real" })).toHaveAttribute("aria-pressed", "false");
       expect(screen.getByTestId("mode")).toHaveTextContent("Mode: mock");
     }
   });
 
-  it("refuses Live with the server's honest message and stays in mock; Mock clears the message", async () => {
+  it("refuses Real through POST /api/mode with the server's honest 409 reason and stays in mock; Mock clears the message", async () => {
     render(<App />);
     await screen.findByText(/Simulated, mock mode/);
-    await userEvent.click(screen.getByRole("button", { name: "Live" }));
+    const real = screen.getByRole("button", { name: "Real" });
+    expect(real).toHaveAttribute("aria-disabled", "true"); // Real is unavailable, with the reason as its tooltip
+    expect(real).toHaveAttribute("title", "Live mode is not available: test.");
+    await userEvent.click(real);
+    expect(requests).toContain('POST /api/mode');
     expect(screen.getByTestId("live-note")).toHaveTextContent("Live mode is not available: test.");
     expect(screen.getByTestId("mode")).toHaveTextContent("Mode: mock");
     expect(screen.getByRole("button", { name: "Mock" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Real" })).toHaveAttribute("aria-pressed", "false");
     await userEvent.click(screen.getByRole("button", { name: "Mock" }));
     expect(screen.getByTestId("live-note")).toBeEmptyDOMElement();
   });

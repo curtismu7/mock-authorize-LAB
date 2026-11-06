@@ -31,9 +31,15 @@ export default function App() {
     setEpoch((n) => n + 1);
     setResetNote(r.ok ? "Reset: rules back to defaults, decisions cleared, issued tokens ended. Worker credentials kept." : "Reset failed: could not reach the server.");
   };
-  // Mock is the only mode this app has. Pressing Live is refused with the reason, and the page stays in mock.
+  // Mock is the only mode this lab has. Real asks the server, which refuses with 409 and the honest reason (rule 19).
   const mode = info?.mode || "mock";
-  const pickMode = (m) => setLiveNote(m === "live" ? (info?.liveMessage || LIVE_FALLBACK) : "");
+  const pickMode = (m) => {
+    if (m === "mock") return setLiveNote("");
+    post("/api/mode", { source: "real" }).then((r) => {
+      if (r.ok && r.data?.mode) setInfo(r.data);
+      else setLiveNote(r.data?.message || LIVE_FALLBACK);
+    }).catch(() => setLiveNote(LIVE_FALLBACK));
+  };
 
   useEffect(() => {
     if (theme === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", theme);
@@ -78,7 +84,9 @@ export default function App() {
             <ShelfLink />
           <div className="seg" role="group" aria-label="Mode">
             <button type="button" aria-pressed={mode === "mock"} onClick={() => pickMode("mock")}>Mock</button>
-            <button type="button" aria-pressed={false} onClick={() => pickMode("live")}>Live</button>
+            <button type="button" aria-pressed={false} aria-disabled={info?.realAvailable === false ? "true" : undefined}
+              title={info?.realAvailable === false && info?.realReason ? info.realReason : undefined}
+              onClick={() => pickMode("real")}>Real</button>
           </div>
           <span className="chip" data-testid="mode">Mode: {mode}</span>
           <button type="button" onClick={reset}>Reset session</button>

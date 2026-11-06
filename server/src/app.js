@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
-import { dataDir, LIVE_REFUSAL, modeFrom } from './config.js';
+import { dataDir, LIVE_REFUSAL } from './config.js';
 import { loadDiagram } from './diagramData.js';
 import { evaluate } from './engine.js';
 import { createHealth } from './health.js';
@@ -49,7 +49,16 @@ export function createApp({
   api.use('/health', health.router);
   // What this build is: the banner on every page reads it. Public, no per-visitor data.
   // This app has no live mode: `live: false` tells the header toggle to refuse Live with the honest message.
-  api.get('/info', (req, res) => res.json({ mode: modeFrom(env), simulated: true, live: false, liveMessage: LIVE_REFUSAL }));
+  // Rule 19: the Mock/Real toggle. Mock Authorize is itself the mock server, so Real is never available: it is
+  // refused with 409 and the honest reason, and the mode never changes. GET /api/info carries the toggle shape.
+  api.get('/info', (req, res) => res.json({ mode: 'mock', source: 'mock', realAvailable: false, realReason: LIVE_REFUSAL, simulated: true, live: false, liveMessage: LIVE_REFUSAL }));
+  api.post('/mode', small, (req, res) => {
+    const body = req.body ?? {};
+    if (!isObject(body) || Object.keys(body).some((k) => k !== 'source')) return bad(res, 'the only accepted body field is { "source": "mock" | "real" }');
+    if (body.source !== 'mock' && body.source !== 'real') return bad(res, 'source must be "mock" or "real"');
+    if (body.source === 'real') return res.status(409).json({ error: 'real_not_available', message: LIVE_REFUSAL, source: 'mock' });
+    return res.json({ mode: 'mock', source: 'mock', realAvailable: false, realReason: LIVE_REFUSAL });
+  });
   // The diagram is diagram-studio/1 data, loaded by name (rule 17).
   api.get('/diagram', (req, res) => {
     try { return res.json(loadDiagram(String(req.query.name || 'mock-authorize-flow'))); } catch { return bad(res, 'no such diagram', 404, 'not_found'); }
