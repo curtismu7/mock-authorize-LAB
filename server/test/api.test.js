@@ -9,9 +9,9 @@ import { DEFAULT_RULES, validate } from '../src/rules.js';
 
 const ENV = '00000000-0000-4000-8000-000000000000';
 
-async function boot() {
+async function boot(extraEnv = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mockaz-test-'));
-  const server = createApp({ env: { DATA_DIR: dir } }).listen(0, '127.0.0.1');
+  const server = createApp({ env: { DATA_DIR: dir, ...extraEnv } }).listen(0, '127.0.0.1');
   await new Promise((r) => server.once('listening', r));
   const base = `http://127.0.0.1:${server.address().port}`;
   const call = async (method, url, { body, headers = {}, form } = {}) => {
@@ -174,5 +174,15 @@ test('console writes must be same-origin', async () => {
   try {
     const r = await fetch(`${t.base}/api/rules/reset`, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'http://evil.example' }, body: '{}' });
     assert.equal(r.status, 403);
+  } finally { await t.close(); }
+});
+
+test('GET /api/shelf returns SHELF_URL (slash trimmed) with no web build; POST is not 200', async () => {
+  const t = await boot({ SHELF_URL: 'https://shelf.example:8443/', HOME: '/nonexistent' });
+  try {
+    const r = await t.call('GET', '/api/shelf');
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.body, { shelfUrl: 'https://shelf.example:8443' });
+    assert.notEqual((await t.call('POST', '/api/shelf', { body: {} })).status, 200);
   } finally { await t.close(); }
 });
