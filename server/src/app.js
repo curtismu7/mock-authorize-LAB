@@ -104,7 +104,7 @@ export function createApp({
   api.post('/worker/rotate', small, (req, res) => res.json(req.ws.worker.rotate()));
 
   api.use((req, res) => bad(res, 'no such endpoint', 404, 'not_found'));
-  app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
+  app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo(env)); }); // the header "Shelf" button
   app.use('/api', api);
 
   if (fs.existsSync(WEB_DIST)) {
