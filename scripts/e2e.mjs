@@ -44,9 +44,12 @@ try {
   await page.getByLabel(/Deny above/).waitFor({ timeout: 10000 }).catch(() => {});
   check(await page.getByLabel(/Deny above/).count() === 1, 'Default page: opens on Rules, not blank');
   check((await page.getByRole('note').innerText()).startsWith('Simulated, mock mode.'), 'Banner: says simulated and names the mode');
-  await page.getByRole('button', { name: 'Live' }).click();
-  await page.getByText(/Live mode is not available/).waitFor();
-  check((await page.getByTestId('mode').innerText()) === 'Mode: mock', 'Header toggle: Live is refused with a message and the mode stays mock');
+  // The header toggle is Mock | Real; Real is shown but disabled (aria-disabled) with the reason in its title.
+  const real = page.getByRole('group', { name: 'Mode' }).getByRole('button', { name: 'Real' });
+  await page.waitForFunction(() => [...document.querySelectorAll('[role="group"][aria-label="Mode"] button')].some((b) => b.getAttribute('aria-disabled') === 'true'));
+  const realTitle = (await real.getAttribute('title')) || '';
+  check((await real.getAttribute('aria-disabled')) === 'true' && /not available/i.test(realTitle), `Header toggle: Real is disabled and says why ("${realTitle.slice(0, 70)}")`);
+  check((await page.getByTestId('mode').innerText()) === 'Mode: mock', 'Header toggle: the mode stays mock');
   await page.getByRole('button', { name: 'Mock' }).click();
   await page.keyboard.press('p');
   await page.getByRole('complementary', { name: 'Talk track' }).waitFor();
