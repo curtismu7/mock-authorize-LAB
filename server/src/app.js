@@ -9,14 +9,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
-import { dataDir, LIVE_REFUSAL } from './config.js';
+import { dataDir, LIVE_REFUSAL, port as configPort } from './config.js';
 import { loadDiagram } from './diagramData.js';
 import { evaluate } from './engine.js';
 import { createHealth } from './health.js';
 import { createPingAuthorizeRouter, createPingoneRouter, ENDPOINTS } from './pingone.js';
 import { clip } from './redact.js';
 import { DEFAULT_RULES } from './rules.js';
-import { hostCheck, sameOriginWrites } from './security.js';
+import { hostCheck, parseAllowedHosts, sameOriginWrites } from './security.js';
 import { tooDeep, traceparentFrom } from './limits.js';
 import { createWorkspaces } from './workspaces.js';
 import { shelfInfo } from './shelfLink.js';
@@ -27,11 +27,11 @@ const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
 
 export function createApp({
   env = process.env, rules, worker, log, workspaces = createWorkspaces({ rules, worker, log, dir: dataDir(env) }),
-  health = createHealth({ env }),
+  health = createHealth({ env }), allowedHosts = parseAllowedHosts(env), port = configPort(env),
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
-  app.use(hostCheck(env));
+  app.use(hostCheck(env, { allowedHosts, port }));
   app.use((_req, res, next) => {
     res.set({
       'Content-Security-Policy': "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
@@ -45,7 +45,7 @@ export function createApp({
 
   const api = express.Router();
   const small = express.json({ limit: '256kb' });
-  api.use(sameOriginWrites());
+  api.use(sameOriginWrites({ allowedHosts, port }));
   api.use('/health', health.router);
   // What this build is: the banner on every page reads it. Public, no per-visitor data.
   // This app has no live mode: `live: false` tells the header toggle to refuse Live with the honest message.
