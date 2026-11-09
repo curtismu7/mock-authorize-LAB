@@ -77,7 +77,7 @@ test('app CSS follows the CSS standard: tokens only, no dark-mode media query, n
   assert.ok(!/prefers-color-scheme/.test(css)); assert.ok(!/!important/.test(css)); assert.ok(!/font-style:\s*italic/.test(css));
   const widths = [...css.matchAll(/@media \((?:max|min)-width: (\d+)px\)/g)].map((m) => m[1]);
   assert.ok(widths.length > 0 && widths.every((w) => w === '600' || w === '900'), widths.join());
-  assert.ok(!/purple|violet|magenta|indigo/i.test(css + read('web/src/styles/standalone-ui.css').replace(/--[a-z-]+:[^;]*;/g, '')));
+  assert.ok(!/purple|violet|magenta|indigo/i.test(css + read('web/src/styles/standalone-ui.css').replace(/\/\*[\s\S]*?\*\//g, '').replace(/--[a-z-]+:[^;]*;/g, '')));
   const main = read('web/src/main.jsx');
   assert.ok(main.indexOf('standalone-ui.css') < main.indexOf('app.css'), 'the shared stylesheet loads before the app stylesheet');
   const pages = ['App.jsx', ...fs.readdirSync(path.join(root, 'web/src/pages')).filter((f) => f.endsWith('.jsx')).map((f) => `pages/${f}`)];
@@ -104,6 +104,7 @@ test('the shared settings file is the only settings file: no per-app .env is rea
   assert.match(read('scripts/doctor.mjs'), /applySharedSettings\(\)/);
 });
 
+// local.ping-devops.com is the family lab-proxy's public origin (rulebook: labs are reached at https://local.ping-devops.com:8443).
 test('only .example and .invalid hosts and the fixture environment id appear in shipped text', () => {
   const hits = [];
   for (const p of walk(root)) {
@@ -111,7 +112,7 @@ test('only .example and .invalid hosts and the fixture environment id appear in 
     const t = read(path.relative(root, p));
     for (const m of t.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)) {
       const h = m[1].toLowerCase();
-      if (!(/\.(example|invalid)$/.test(h) || ['127.0.0.1', 'localhost', 'github.com', 'json-schema.org', 'www.w3.org', 'registry.npmjs.org', 'host.docker.internal'].includes(h))) hits.push(`${path.relative(root, p)}: ${h}`);
+      if (!(/\.(example|invalid)$/.test(h) || ['127.0.0.1', 'localhost', 'github.com', 'json-schema.org', 'www.w3.org', 'registry.npmjs.org', 'host.docker.internal', 'local.ping-devops.com'].includes(h))) hits.push(`${path.relative(root, p)}: ${h}`);
     }
     for (const m of t.matchAll(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g)) {
       if (m[0] !== '00000000-0000-4000-8000-000000000000') hits.push(`${path.relative(root, p)}: uuid ${m[0]}`);

@@ -51,3 +51,9 @@ test('the container is locked down: read-only fs, no capabilities, no new privil
   assert.match(compose, /no-new-privileges:true/);
   assert.match(here('Dockerfile'), /^USER node$/m);
 });
+
+test('docker-compose.yml allows the lab-proxy name for this lab by default, never the bare proxy name', () => {
+  const m = /LAB_ALLOWED_HOSTS: \$\{LAB_ALLOWED_HOSTS:-([^}]*)\}/.exec(here('docker-compose.yml'));
+  assert.ok(m, 'LAB_ALLOWED_HOSTS has a default');
+  assert.deepEqual(m[1].split(',').map((n) => n.trim()), ['mock-authorize.local.ping-devops.com']);
+});

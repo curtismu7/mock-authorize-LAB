@@ -11,7 +11,9 @@ services:
     environment:
       SHELF_URL: ${SHELF_URL:-http://127.0.0.1:4400}
       PORT: "4850"
-      # The browser's Host header is 127.0.0.1:HOST_PORT; the Host check compares names only, so any HOST_PORT works.
+      # The browser's Host header is 127.0.0.1:HOST_PORT; the Host check compares loopback names only, so any HOST_PORT works.
+      # The name the family lab-proxy (https://local.ping-devops.com:8443) sends in Host, with port 4850; loopback always works.
+      LAB_ALLOWED_HOSTS: ${LAB_ALLOWED_HOSTS:-mock-authorize.local.ping-devops.com}
     volumes:
       - mock-authorize-data:/data
     read_only: true
