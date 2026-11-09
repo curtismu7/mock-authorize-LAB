@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ShelfLink from "./components/ShelfLink.jsx";
+// Opened from Customer Agent LAB (UC6 routes here): strip + header Back only, nothing preselected.
+import ReturnLink from "./return-link/ReturnLink.jsx";
 import Connect from "./pages/Connect.jsx";
 import Decisions from "./pages/Decisions.jsx";
 import Diagram from "./pages/Diagram.jsx";
@@ -73,6 +75,7 @@ export default function App() {
       <p className="banner" role="note" data-state="mock">
         Simulated, {mode} mode. Mock Authorize answers from rules on this machine. It is not PingOne, and nothing here reaches a real tenant. Its answer shapes are UNVERIFIED against PingOne.
       </p>
+      <ReturnLink app="mock-authorize" />
       <header className="top">
         <h1>Mock Authorize LAB</h1>
         <nav aria-label="Pages">
@@ -81,6 +84,7 @@ export default function App() {
           ))}
         </nav>
         <div className="top__tools">
+          <ReturnLink app="mock-authorize" variant="header" />
             <ShelfLink />
           <div className="seg" role="group" aria-label="Mode">
             <button type="button" aria-pressed={mode === "mock"} onClick={() => pickMode("mock")}>Mock</button>
