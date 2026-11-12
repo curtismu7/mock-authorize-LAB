@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../../App.jsx";
@@ -28,7 +28,7 @@ beforeEach(() => { localStorage.clear(); window.location.hash = ""; resetOk = tr
 describe("Reset (rule 3)", () => {
   it("is in the header and asks the server to reset, then says what it did and what it kept", async () => {
     render(<App />);
-    await userEvent.click(screen.getByRole("button", { name: "Reset session" }));
+    await userEvent.click(screen.getByRole("button", { name: "Reset" }));
     expect(requests).toContain("POST /api/reset");
     expect(await screen.findByText(/rules back to defaults, decisions cleared, issued tokens ended\. Worker credentials kept\./)).toBeInTheDocument();
   });
@@ -36,7 +36,7 @@ describe("Reset (rule 3)", () => {
   it("says so when the server cannot be reached, instead of pretending it worked", async () => {
     resetOk = false;
     render(<App />);
-    await userEvent.click(screen.getByRole("button", { name: "Reset session" }));
+    await userEvent.click(screen.getByRole("button", { name: "Reset" }));
     expect(await screen.findByText(/Reset failed: could not reach the server\./)).toBeInTheDocument();
   });
 
@@ -44,7 +44,7 @@ describe("Reset (rule 3)", () => {
     render(<App />);
     await userEvent.click(screen.getByRole("link", { name: "How it fits" }));
     const before = screen.getByRole("main").firstElementChild;
-    await userEvent.click(screen.getByRole("button", { name: "Reset session" }));
+    await userEvent.click(screen.getByTestId("reset"));
     await screen.findByText(/Worker credentials kept/);
     expect(screen.getByRole("main").firstElementChild).not.toBe(before);
   });
@@ -61,14 +61,14 @@ describe("Simulation banner (rule 2)", () => {
   });
 });
 
-describe("Mock | Live toggle (header, every page)", () => {
+describe("Mock | Live mode dropdown (header, every page)", () => {
   it("is in the header on every page, mock by default, and shows the mode", async () => {
     render(<App />);
     for (const name of ["Rules", "Try", "Decisions", "Connect", "How it fits"]) {
       await userEvent.click(screen.getByRole("link", { name }));
-      const group = screen.getByRole("group", { name: "Mode" });
-      expect(within(group).getByRole("button", { name: "Mock" })).toHaveAttribute("aria-pressed", "true");
-      expect(within(group).getByRole("button", { name: "Real" })).toHaveAttribute("aria-pressed", "false");
+      const select = screen.getByTestId("mode-select");
+      expect(select).toHaveValue("mock");
+      expect(within(select).getByRole("option", { name: "Real" })).toBeInTheDocument();
       expect(screen.getByTestId("mode")).toHaveTextContent("Mode: mock");
     }
   });
@@ -76,16 +76,15 @@ describe("Mock | Live toggle (header, every page)", () => {
   it("refuses Real through POST /api/mode with the server's honest 409 reason and stays in mock; Mock clears the message", async () => {
     render(<App />);
     await screen.findByText(/Simulated, mock mode/);
-    const real = screen.getByRole("button", { name: "Real" });
-    expect(real).toHaveAttribute("aria-disabled", "true"); // Real is unavailable, with the reason as its tooltip
-    expect(real).toHaveAttribute("title", "Live mode is not available: test.");
-    await userEvent.click(real);
+    const select = screen.getByTestId("mode-select");
+    expect(within(select).getByRole("option", { name: "Real" })).toBeDisabled(); // Real is unavailable
+    fireEvent.change(select, { target: { value: "real" } });
     expect(requests).toContain('POST /api/mode');
+    expect(await screen.findByText("Live mode is not available: test.")).toBeInTheDocument();
     expect(screen.getByTestId("live-note")).toHaveTextContent("Live mode is not available: test.");
     expect(screen.getByTestId("mode")).toHaveTextContent("Mode: mock");
-    expect(screen.getByRole("button", { name: "Mock" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Real" })).toHaveAttribute("aria-pressed", "false");
-    await userEvent.click(screen.getByRole("button", { name: "Mock" }));
+    expect(select).toHaveValue("mock");
+    fireEvent.change(select, { target: { value: "mock" } });
     expect(screen.getByTestId("live-note")).toBeEmptyDOMElement();
   });
 });
@@ -97,7 +96,7 @@ describe("Presenter mode (rule 3)", () => {
     await userEvent.keyboard("p");
     expect(await screen.findByRole("complementary", { name: "Talk track" })).toHaveTextContent("Set the rules");
     expect(screen.getByRole("note")).toHaveTextContent(/Simulated, mock mode/);
-    expect(screen.getByRole("button", { name: /Exit presenter/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("presenter")).toHaveAttribute("aria-pressed", "true");
     await userEvent.keyboard("{Escape}");
     expect(screen.queryByRole("complementary", { name: "Talk track" })).not.toBeInTheDocument();
     await userEvent.keyboard("P");
@@ -129,7 +128,7 @@ describe("Landmarks and focus", () => {
   it("keeps one main landmark, and Reset leaves focus on the Reset button", async () => {
     render(<App />);
     expect(await screen.findAllByRole("main")).toHaveLength(1);
-    const btn = screen.getByRole("button", { name: "Reset session" });
+    const btn = screen.getByRole("button", { name: "Reset" });
     btn.focus();
     await userEvent.click(btn);
     await screen.findByText(/Worker credentials kept/);

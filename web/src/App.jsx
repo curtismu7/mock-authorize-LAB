@@ -8,7 +8,11 @@ import Diagram from "./pages/Diagram.jsx";
 import Rules from "./pages/Rules.jsx";
 import Try from "./pages/Try.jsx";
 import { get, post } from "./lib/api.js";
+import TopMenu, { applyFontSize } from "./top-menu/TopMenu.jsx";
 import stories from "../../content/stories.json";
+
+import fs from "node:fs";
+const LAB_VERSION = (() => { try { return JSON.parse(fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8")).version || null; } catch { return null; } })();
 
 const PAGES = [["rules", "Rules"], ["try", "Try"], ["decisions", "Decisions"], ["connect", "Connect"], ["diagram", "How it fits"]];
 // Presenter mode shows the talk-track line for the page. The lines are the stories in content/stories.json, the same data docs/talk-track.md is generated from.
@@ -22,6 +26,7 @@ const store = {
 export default function App() {
   const [page, setPage] = useState(() => (PAGES.some(([id]) => id === window.location.hash.slice(1)) ? window.location.hash.slice(1) : "rules"));
   const [theme, setTheme] = useState(() => store.read("mockaz-theme") || "system");
+  const [fontStep, setFontStep] = useState(() => (["S", "M", "L"].includes(store.read("mockaz-font")) ? store.read("mockaz-font") : "M"));
   const [epoch, setEpoch] = useState(0); // bumped by Reset: remounts the pages, so the diagram boxes and form fields start over
   const [resetNote, setResetNote] = useState("");
   const [info, setInfo] = useState(null);
@@ -47,6 +52,7 @@ export default function App() {
     if (theme === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", theme);
     store.write("mockaz-theme", theme);
   }, [theme]);
+  useEffect(() => { applyFontSize(fontStep); store.write("mockaz-font", fontStep); }, [fontStep]);
   useEffect(() => { window.location.hash = page; }, [page]);
   // Back, Forward or a typed fragment switches the page too (review finding: it did not).
   useEffect(() => {
@@ -85,23 +91,18 @@ export default function App() {
         </nav>
         <div className="top__tools">
           <ReturnLink app="mock-authorize" variant="header" />
+          <TopMenu
+            mode={{ value: mode, onChange: pickMode, realAvailable: info ? info.realAvailable : null, realHint: info?.realReason || LIVE_FALLBACK }}
+            theme={{ value: theme === "system" ? "auto" : theme, onChange: (v) => setTheme(v === "auto" ? "system" : v) }}
+            fontSize={{ value: fontStep, onChange: setFontStep }}
+            present={{ active: presenter, onToggle: () => setPresenter((v) => !v), label: "Presenter (P)" }}
+            help={{ href: "https://github.com/curtismu7/mock-authorize-LAB#readme" }}
+            version={LAB_VERSION}
+            onReset={reset}
+          >
             <ShelfLink />
-          <div className="seg" role="group" aria-label="Mode">
-            <button type="button" aria-pressed={mode === "mock"} onClick={() => pickMode("mock")}>Mock</button>
-            <button type="button" aria-pressed={false} aria-disabled={info?.realAvailable === false ? "true" : undefined}
-              title={info?.realAvailable === false && info?.realReason ? info.realReason : undefined}
-              onClick={() => pickMode("real")}>Real</button>
-          </div>
+          </TopMenu>
           <span className="chip" data-testid="mode">Mode: {mode}</span>
-          <button type="button" onClick={reset}>Reset session</button>
-          <button type="button" aria-pressed={presenter} onClick={() => setPresenter((v) => !v)}>{presenter ? "Exit presenter (Esc)" : "Presenter (P)"}</button>
-          {!presenter && (
-            <label className="theme">Theme
-              <select value={theme} onChange={(e) => setTheme(e.target.value)}>
-                <option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option>
-              </select>
-            </label>
-          )}
         </div>
       </header>
       <div role="status" data-testid="live-note">{liveNote && <p className="alert">{liveNote}</p>}</div>
