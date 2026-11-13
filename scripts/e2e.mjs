@@ -44,13 +44,12 @@ try {
   await page.getByLabel(/Deny above/).waitFor({ timeout: 10000 }).catch(() => {});
   check(await page.getByLabel(/Deny above/).count() === 1, 'Default page: opens on Rules, not blank');
   check((await page.getByRole('note').innerText()).startsWith('Simulated, mock mode.'), 'Banner: says simulated and names the mode');
-  // The header toggle is Mock | Real; Real is shown but disabled (aria-disabled) with the reason in its title.
-  const real = page.getByRole('group', { name: 'Mode' }).getByRole('button', { name: 'Real' });
-  await page.waitForFunction(() => [...document.querySelectorAll('[role="group"][aria-label="Mode"] button')].some((b) => b.getAttribute('aria-disabled') === 'true'));
+  // The shared TopMenu: the mode is a select; Real is a disabled option whose title says why.
+  const real = page.getByTestId('mode-real');
+  await page.waitForFunction(() => document.querySelector('[data-testid="mode-real"]')?.disabled === true);
   const realTitle = (await real.getAttribute('title')) || '';
-  check((await real.getAttribute('aria-disabled')) === 'true' && /not available/i.test(realTitle), `Header toggle: Real is disabled and says why ("${realTitle.slice(0, 70)}")`);
+  check((await real.evaluate((o) => o.disabled)) === true && /not available/i.test(realTitle), `Header toggle: Real is disabled and says why ("${realTitle.slice(0, 70)}")`);
   check((await page.getByTestId('mode').innerText()) === 'Mode: mock', 'Header toggle: the mode stays mock');
-  await page.getByRole('button', { name: 'Mock' }).click();
   await page.keyboard.press('p');
   await page.getByRole('complementary', { name: 'Talk track' }).waitFor();
   check((await page.getByRole('note').count()) === 1, 'Presenter (P): shows the talk-track line and keeps the banner');
@@ -95,7 +94,7 @@ try {
   check(true, 'Diagram: Simulate shows a captioned step');
   // Rule 3: Reset session in a real browser restores the rules, clears the log and ends the old token, and says so.
   const stale = tok.access_token;
-  await page.getByRole('button', { name: 'Reset session' }).click();
+  await page.getByTestId('reset').click();
   await page.getByText(/Worker credentials kept/).waitFor();
   check((await (await fetch(`${base}/api/decisions`)).json()).decisions.length === 0, 'Reset session: the decision log is empty');
   check((await (await fetch(`${base}/api/rules`)).json()).edited.length === 0, 'Reset session: rules are back to defaults');
