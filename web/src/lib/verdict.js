@@ -10,3 +10,7 @@ export function verdictOf(raw) {
   if (!gate) return "PERMIT";
   return /step/i.test(`${gate.code} ${gate.name}`) ? "STEP_UP" : "CONSENT";
 }
+
+// The keys that matter in this lab's JSON panes, marked for JsonPane (`decision` is already stood out by default): what was asked, and the statements that explain the answer.
+export const REQUEST_HOT = ["Amount", "TransactionType", "ToolName", "HitlApproved"];
+export const RESPONSE_HOT = ["statements", "code"];

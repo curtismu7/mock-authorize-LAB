@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Verdict } from "../components/Verdict.jsx";
-import { post, pretty } from "../lib/api.js";
-import { verdictOf } from "../lib/verdict.js";
+import Json from "../components/JsonPane.jsx";
+import { post } from "../lib/api.js";
+import { REQUEST_HOT, RESPONSE_HOT, verdictOf } from "../lib/verdict.js";
 
 // Ask for a decision from the console. No token: this is the quick way to see a rule at work. It is logged like any other call.
 const PRESETS = [["transaction", "Transaction"], ["mcp", "MCP tool"], ["custom", "Custom (JSON)"]];
@@ -58,8 +59,8 @@ export default function Try() {
           <p className="muted small">{raw.elapsedMicroseconds} µs · correlation <code>{raw.correlationId}</code></p>
           <h4>Statements</h4>
           <ul className="stmts">{raw.statements.map((s, i) => <li key={i}><strong>{s.name}</strong> <code>{s.code}</code>{s.statement ? `: ${s.statement}` : ""}</li>)}</ul>
-          <h4>Request</h4><pre>{pretty({ parameters: out.parameters })}</pre>
-          <h4>Response</h4><pre>{pretty(raw)}</pre>
+          <h4>Request</h4><Json value={{ parameters: out.parameters }} label="Request" testId="try-request" hot={REQUEST_HOT} />
+          <h4>Response</h4><Json value={raw} label="Response" testId="try-response" hot={RESPONSE_HOT} />
         </div>
       )}
     </>
