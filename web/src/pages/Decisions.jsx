@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Source, Verdict } from "../components/Verdict.jsx";
-import { del, get, pretty } from "../lib/api.js";
-import { verdictOf } from "../lib/verdict.js";
+import Json from "../components/JsonPane.jsx";
+import { del, get } from "../lib/api.js";
+import { REQUEST_HOT, RESPONSE_HOT, verdictOf } from "../lib/verdict.js";
 
 // Every decision this server made: from the Try page ("Console") and from clients calling the PingOne-shaped API ("API").
 export default function Decisions() {
@@ -29,8 +30,8 @@ export default function Decisions() {
           <div className="card" data-testid="decision-detail">
             {sel && <>
               <h3><Verdict decision={verdictOf(sel.decisionResponse)} /> <Source source={sel.source} /></h3>
-              <h4>Request</h4><pre>{pretty({ parameters: sel.parameters })}</pre>
-              <h4>Response</h4><pre>{pretty(sel.decisionResponse)}</pre>
+              <h4>Request</h4><Json value={{ parameters: sel.parameters }} label="Decision request" testId="decision-request" hot={REQUEST_HOT} />
+              <h4>Response</h4><Json value={sel.decisionResponse} label="Decision response" testId="decision-response" hot={RESPONSE_HOT} />
             </>}
           </div>
         </div>

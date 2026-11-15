@@ -7,6 +7,7 @@ import Diagram from "../Diagram.jsx";
 import Rules from "../Rules.jsx";
 import Try, { buildParameters } from "../Try.jsx";
 import { verdictOf } from "../../lib/verdict.js";
+import { setJsonView } from "../../components/JsonPane.jsx";
 import flow from "../../../../server/diagrams/mock-authorize-flow.json";
 
 const DEFAULTS = { denyAmountUsd: 2000, stepUpAmountUsd: 500, consentTypes: ["transfer"], denyTools: ["delete_account"], hitlTools: ["create_transfer"] };
@@ -80,6 +81,23 @@ describe("Try", () => {
     expect(result).toHaveTextContent("HITL_CONSENT");
     expect(calls.find((c) => c.key === "POST /api/try").body).toMatchObject({ endpointId: "mock-transaction", parameters: { Amount: 500, TransactionType: "transfer" } });
   });
+  it("shows the request and the response through the shared JSON pane: Form | JSON toggle, the exact JSON text in the JSON view", async () => {
+    setJsonView("form");
+    render(<Try />);
+    await userEvent.click(screen.getByRole("button", { name: "Send" }));
+    const res = await screen.findByTestId("try-response");
+    expect(screen.getByTestId("try-request")).toBeInTheDocument();
+    expect(res).toHaveTextContent("PERMIT");
+    expect(screen.getByTestId("try-response-formatted")).toHaveTextContent("Form");
+    expect(screen.getByTestId("try-response-raw")).toHaveTextContent("JSON");
+    expect(screen.getByTestId("try-response-formatted")).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(screen.getByTestId("try-response-raw"));
+    expect(screen.getByTestId("try-response-raw")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("try-response").tagName).toBe("PRE");
+    expect(screen.getByTestId("try-response")).toHaveTextContent('"decision": "PERMIT"');
+    expect(screen.getByTestId("try-request")).toHaveTextContent('"Amount": 500');
+    setJsonView("form");
+  });
   it("custom JSON that is not valid is refused before any call", async () => {
     render(<Try />);
     await userEvent.click(screen.getByRole("button", { name: "Custom (JSON)" }));
@@ -107,6 +125,15 @@ describe("Decisions", () => {
     expect((await screen.findAllByText("API")).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Console").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Deny").length).toBeGreaterThan(0);
+  });
+  it("shows the selected decision's request and response through the shared JSON pane", async () => {
+    decisions = [{ id: "a", source: "api", endpointId: "mock-transaction", requestedAt: "2026-10-21T10:00:02Z", parameters: { Amount: 1 }, decisionResponse: { decision: "DENY", statements: [] } }];
+    setJsonView("raw");
+    render(<Decisions />);
+    expect(await screen.findByTestId("decision-request")).toHaveTextContent('"Amount": 1');
+    expect(screen.getByTestId("decision-response")).toHaveTextContent('"decision": "DENY"');
+    expect(screen.getByTestId("decision-response-box")).toBeInTheDocument();
+    setJsonView("form");
   });
   it("says what to do when there are none", async () => {
     render(<Decisions />);
