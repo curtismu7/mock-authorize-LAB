@@ -1,6 +1,7 @@
 # Changelog
 
 ## 0.1.0 (unreleased)
+- Verification mark in the header: the shared `VerifyMark` (vendored from AI-DEMO-Standalone `shared/verify-mark`, byte for byte, pinned) shows this lab's Verified / In progress mark from the demo shelf, inside the top menu beside the Shelf link. It reads the same `GET /api/shelf` call the Shelf link makes, so it shows through the lab-proxy (where that call reaches the shelf) and nothing when the lab is opened on its own port, when the shelf has no mark for it, or when the shelf is unreachable.
 - Fix pass: re-ported the loopback-bind, decision-log byte-budget and worker-secret-not-echoed tests (they went with the hosted tests), added tests for the deny limit boundary and the recentDecisions limit clamp, the startup log now names the real bound address, and the first diagram group is "Caller" so it no longer repeats the node title.
 - Moved to the -LAB standard (`mock-authorize-LAB`): Node 26, shared stylesheet and tokens-only app CSS, Mock | Live toggle in the header on every page (Live is refused: this app is the mock), banner naming the mode, presenter mode (P / Esc), talk track generated from `content/stories.json` with a drift test, the diagram served as diagram-studio/1 data by name, one shared settings file (`MOCKAZ_LAB_MODE` only), `dgram` connect guard in the netguard, hosted GitHub CI.
 - Removed the SE hosted build: `k8s/`, `MODE` / `MOCKAZ_HOSTED`, per-visitor workspaces, cookies, `MOCKAZ_ALLOWED_HOSTS`, the path-prefix build and its tests.
