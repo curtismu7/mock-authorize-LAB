@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ShelfLink from "./components/ShelfLink.jsx";
+import VerifyMark from "./components/VerifyMark.jsx";
 // Opened from Customer Agent LAB (UC6 routes here): strip + header Back only, nothing preselected.
 import ReturnLink from "./return-link/ReturnLink.jsx";
 import Connect from "./pages/Connect.jsx";
@@ -101,6 +102,7 @@ export default function App() {
             onReset={reset}
           >
             <ShelfLink />
+            <VerifyMark id="mock-authorize" />
           </TopMenu>
           <span className="chip" data-testid="mode">Mode: {mode}</span>
         </div>
