@@ -26,13 +26,14 @@ describe("return link", () => {
     for (const [h, f] of pins) expect(createHash("sha256").update(fs.readFileSync(path.join(dir, f))).digest("hex"), f).toBe(h);
   });
 
-  it("?from=customer-agent: banner first, strip right below, header Back in the tools", async () => {
+  it("?from=customer-agent: banner first, strip right below, header Back in the shell bar TopMenu", async () => {
     window.history.replaceState(null, "", "/?from=customer-agent&uc=UC6&vertical=banking");
     render(<App />);
     const note = await screen.findByRole("note", NOTE);
     expect(note.textContent).toContain("UC6");
     expect(document.querySelector("p.banner").nextElementSibling).toBe(note);
-    expect(document.querySelector(".top__tools > button.return-link--header")).not.toBeNull();
+    expect(document.querySelector("header.shell-bar .shell-right button.return-link--header")).not.toBeNull();
+    expect(document.querySelector("main").firstElementChild).toBe(document.querySelector("p.banner")); // shell bar first, then main with the banner first
     expect(screen.getAllByRole("button", { name: /Back to Customer Agent LAB/ })).toHaveLength(2);
   });
 

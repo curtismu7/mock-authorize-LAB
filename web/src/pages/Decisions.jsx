@@ -16,6 +16,7 @@ export default function Decisions() {
     <>
       <h2>Decisions</h2>
       <p className="lede">Everything this server decided, newest first. Calls from other apps, such as the P1AZ Inspector in Live mode, show up here as API.</p>
+      {/* ui-pattern: allow P9 no primary here: Decisions is a read-only log that refreshes itself every 3s; Refresh and Clear are maintenance, not the page action */}
       <div className="controls"><button type="button" onClick={refresh}>Refresh</button>{items.length > 0 && <button type="button" onClick={async () => { await del("/api/decisions"); refresh(); }}>Clear</button>}</div>
       {items.length === 0 ? <p className="muted">No decisions yet. Use the Try page, or point a client at this server (see Connect).</p> : (
         <div className="split">

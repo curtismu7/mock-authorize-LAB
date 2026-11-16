@@ -43,10 +43,11 @@ describe("Reset (rule 3)", () => {
   it("remounts the page, so the diagram boxes (held in page state) start over", async () => {
     render(<App />);
     await userEvent.click(screen.getByRole("link", { name: "How it fits" }));
-    const before = screen.getByRole("main").firstElementChild;
+    // The banner opens <main> and stays put; the page itself is the last child and is the part that remounts.
+    const before = screen.getByRole("main").lastElementChild;
     await userEvent.click(screen.getByTestId("reset"));
     await screen.findByText(/Worker credentials kept/);
-    expect(screen.getByRole("main").firstElementChild).not.toBe(before);
+    expect(screen.getByRole("main").lastElementChild).not.toBe(before);
   });
 });
 
@@ -69,7 +70,7 @@ describe("Mock | Live mode dropdown (header, every page)", () => {
       const select = screen.getByTestId("mode-select");
       expect(select).toHaveValue("mock");
       expect(within(select).getByRole("option", { name: "Real" })).toBeInTheDocument();
-      expect(screen.getByTestId("mode")).toHaveTextContent("Mode: mock");
+      expect(screen.getByTestId("mode-badge")).toHaveTextContent("Mock");
     }
   });
 
@@ -82,10 +83,29 @@ describe("Mock | Live mode dropdown (header, every page)", () => {
     expect(requests).toContain('POST /api/mode');
     expect(await screen.findByText("Live mode is not available: test.")).toBeInTheDocument();
     expect(screen.getByTestId("live-note")).toHaveTextContent("Live mode is not available: test.");
-    expect(screen.getByTestId("mode")).toHaveTextContent("Mode: mock");
+    expect(screen.getByTestId("mode-badge")).toHaveTextContent("Mock");
     expect(select).toHaveValue("mock");
     fireEvent.change(select, { target: { value: "mock" } });
     expect(screen.getByTestId("live-note")).toBeEmptyDOMElement();
+  });
+});
+
+describe("Shell bar (UI patterns section 1)", () => {
+  it("brand, Mock badge, the current page pill and the TopMenu in header.shell-bar; then <main> with the banner first, on every page", async () => {
+    render(<App />);
+    await screen.findByRole("note");
+    for (const name of ["Rules", "Try", "Decisions", "Connect", "How it fits"]) {
+      await userEvent.click(screen.getByRole("link", { name }));
+      const bar = document.querySelector("header.shell-bar");
+      expect(bar).not.toBeNull();
+      expect(document.querySelectorAll("header")).toHaveLength(1);
+      expect(bar.querySelector(".shell-brand h1")).toHaveTextContent("Mock Authorize LAB");
+      expect(bar.querySelector("[data-testid=mode-badge]")).toHaveTextContent("Mock");
+      expect(bar.querySelector('.shell-nav a[aria-current="page"]')).toHaveTextContent(name);
+      expect(bar.querySelector("[data-testid=top-menu]")).toHaveClass("shell-right");
+      expect(bar.nextElementSibling).toBe(screen.getByRole("main"));
+      expect(screen.getByRole("main").firstElementChild).toBe(screen.getByRole("note"));
+    }
   });
 });
 
