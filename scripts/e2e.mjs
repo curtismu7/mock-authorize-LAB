@@ -49,7 +49,7 @@ try {
   await page.waitForFunction(() => document.querySelector('[data-testid="mode-real"]')?.disabled === true);
   const realTitle = (await real.getAttribute('title')) || '';
   check((await real.evaluate((o) => o.disabled)) === true && /not available/i.test(realTitle), `Header toggle: Real is disabled and says why ("${realTitle.slice(0, 70)}")`);
-  check((await page.getByTestId('mode').innerText()) === 'Mode: mock', 'Header toggle: the mode stays mock');
+  check((await page.getByTestId('mode-badge').textContent()) === 'Mock', 'Header toggle: the mode stays mock (shell-bar badge)');
   await page.keyboard.press('p');
   await page.getByRole('complementary', { name: 'Talk track' }).waitFor();
   check((await page.getByRole('note').count()) === 1, 'Presenter (P): shows the talk-track line and keeps the banner');

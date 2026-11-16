@@ -79,43 +79,47 @@ export default function App() {
   return (
     <div className="app" data-presenter={presenter ? "on" : "off"}>
       <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById("main")?.focus(); }}>Skip to content</a>
-      <p className="banner" role="note" data-state="mock">
-        Simulated, {mode} mode. Mock Authorize answers from rules on this machine. It is not PingOne, and nothing here reaches a real tenant. Its answer shapes are UNVERIFIED against PingOne.
-      </p>
-      <ReturnLink app="mock-authorize" />
-      <header className="top">
-        <h1>Mock Authorize LAB</h1>
-        <nav aria-label="Pages">
+      <header className="shell-bar">
+        <span className="shell-brand">
+          <span className="shell-logo" aria-hidden="true">MA</span>
+          <h1>Mock Authorize LAB</h1>
+          <span className={`shell-badge${mode === "mock" ? "" : " shell-badge--real"}`} data-testid="mode-badge">{mode === "mock" ? "Mock" : "Real"}</span>
+        </span>
+        <nav className="shell-nav" aria-label="Pages">
           {PAGES.map(([id, label]) => (
             <a key={id} href={`#${id}`} aria-current={page === id ? "page" : undefined} onClick={(e) => { e.preventDefault(); setPage(id); }}>{label}</a>
           ))}
         </nav>
-        <div className="top__tools">
+        <TopMenu
+          mode={{ value: mode, onChange: pickMode, realAvailable: info ? info.realAvailable : null, realHint: info?.realReason || LIVE_FALLBACK }}
+          theme={{ value: theme === "system" ? "auto" : theme, onChange: (v) => setTheme(v === "auto" ? "system" : v) }}
+          fontSize={{ value: fontStep, onChange: setFontStep }}
+          present={{ active: presenter, onToggle: () => setPresenter((v) => !v), label: "Presenter (P)" }}
+          help={{ href: "https://github.com/curtismu7/mock-authorize-LAB#readme" }}
+          version={LAB_VERSION}
+          onReset={reset}
+        >
           <ReturnLink app="mock-authorize" variant="header" />
-          <TopMenu
-            mode={{ value: mode, onChange: pickMode, realAvailable: info ? info.realAvailable : null, realHint: info?.realReason || LIVE_FALLBACK }}
-            theme={{ value: theme === "system" ? "auto" : theme, onChange: (v) => setTheme(v === "auto" ? "system" : v) }}
-            fontSize={{ value: fontStep, onChange: setFontStep }}
-            present={{ active: presenter, onToggle: () => setPresenter((v) => !v), label: "Presenter (P)" }}
-            help={{ href: "https://github.com/curtismu7/mock-authorize-LAB#readme" }}
-            version={LAB_VERSION}
-            onReset={reset}
-          >
-            <ShelfLink />
-            <VerifyMark id="mock-authorize" />
-          </TopMenu>
-          <span className="chip" data-testid="mode">Mode: {mode}</span>
-        </div>
+          <ShelfLink />
+          <VerifyMark id="mock-authorize" />
+        </TopMenu>
       </header>
-      <div role="status" data-testid="live-note">{liveNote && <p className="alert">{liveNote}</p>}</div>
-      <p className="sr-only" role="status">{resetNote}</p>
-      <main className="page" id="main" tabIndex={-1} key={epoch}>
-        {presenter && say && <aside className="presenter-say" aria-label="Talk track"><p><strong>{say.title}.</strong> {say.say}</p></aside>}
-        {page === "rules" && <Rules />}
-        {page === "try" && <Try />}
-        {page === "decisions" && <Decisions />}
-        {page === "connect" && <Connect />}
-        {page === "diagram" && <Diagram theme={theme} />}
+      <main className="page" id="main" tabIndex={-1}>
+        <p className="banner" role="note" data-state="mock">
+          Simulated, {mode} mode. Mock Authorize answers from rules on this machine. It is not PingOne, and nothing here reaches a real tenant. Its answer shapes are UNVERIFIED against PingOne.
+        </p>
+        <ReturnLink app="mock-authorize" />
+        <div role="status" data-testid="live-note" className="live-note">{liveNote && <p className="alert">{liveNote}</p>}</div>
+        <p className="sr-only" role="status">{resetNote}</p>
+        {/* Reset bumps the key: the page remounts, so the diagram boxes and form fields start over. */}
+        <React.Fragment key={epoch}>
+          {presenter && say && <aside className="presenter-say" aria-label="Talk track"><p><strong>{say.title}.</strong> {say.say}</p></aside>}
+          {page === "rules" && <Rules />}
+          {page === "try" && <Try />}
+          {page === "decisions" && <Decisions />}
+          {page === "connect" && <Connect />}
+          {page === "diagram" && <Diagram theme={theme} />}
+        </React.Fragment>
       </main>
     </div>
   );

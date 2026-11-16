@@ -25,6 +25,7 @@ export default function Connect() {
           {row("Decision endpoint", config?.endpoints.map((e) => e.id).join(" or ") || "…")}
         </tbody></table>
         <p className="muted small">Then switch the Inspector to Live P1AZ and press Send. The decision shows up on the Decisions page here, as API.</p>
+        {/* ui-pattern: allow P9 no primary here: Connect is a read-only reference page, and Rotate is a maintenance action, not the action the page exists for */}
         <button type="button" onClick={async () => { const r = await post("/api/worker/rotate"); if (r.ok) setWorker(r.data); }}>Rotate the worker secret</button>
       </div>
       <div className="card">
