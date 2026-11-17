@@ -1,8 +1,8 @@
 /* App layout only. Colours, fonts, controls and the dark theme come from styles/standalone-ui.css (loaded first). Tokens only here:
    no colour literals, no dark-mode media queries, no forced priority, breakpoints 600px and 900px only. */
-/* Page frame (UI patterns section 3): one centred 1100px column; the simulation banner is its first child. The shared sheet
+/* Page frame (UI patterns section 3): one centred 2200px column; the simulation banner is its first child. The shared sheet
    gives the body its 16px side gutter, so the page only adds vertical space. */
-.page { max-width: 1100px; margin: 0 auto; padding: 8px 0 32px; }
+.page { max-width: 2200px; margin: 0 auto; padding: 8px 0 32px; }
 h2 { margin: 8px 0 4px; font-size: 22px; }
 h3 { margin: 16px 0 8px; font-size: 17px; }
 h4 { margin: 8px 0 4px; font-size: 15px; color: var(--text); }
