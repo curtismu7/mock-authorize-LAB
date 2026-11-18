@@ -10,6 +10,8 @@ import Rules from "./pages/Rules.jsx";
 import Try from "./pages/Try.jsx";
 import { get, post } from "./lib/api.js";
 import TopMenu, { applyFontSize } from "./top-menu/TopMenu.jsx";
+import TalkTrackDialog from "./talk-track/TalkTrackDialog.jsx";
+import talkMd from "../../docs/talk-track.md?raw";
 import stories from "../../content/stories.json";
 
 import fs from "node:fs";
@@ -26,6 +28,15 @@ const store = {
 
 export default function App() {
   const [page, setPage] = useState(() => (PAGES.some(([id]) => id === window.location.hash.slice(1)) ? window.location.hash.slice(1) : "rules"));
+  const [talkOpen, setTalkOpen] = useState(false);
+  const talkSteps = (() => {
+    const steps = []; let n = 0;
+    for (const line of talkMd.split("\n")) {
+      const m = line.match(/^\d+\.\s+(?:"(.+?)"|\*\*(.+?)\.\*\*\s*(.*))$/);
+      if (m) { n += 1; steps.push({ id: `s${n}`, title: (m[1] || m[2]).slice(0, 60), say: m[1] || m[3] }); }
+    }
+    return steps.length ? steps : [{ id: "s1", title: "Talk track", say: talkMd.slice(0, 600) }];
+  })();
   const [theme, setTheme] = useState(() => store.read("mockaz-theme") || "system");
   const [fontStep, setFontStep] = useState(() => (["S", "M", "L"].includes(store.read("mockaz-font")) ? store.read("mockaz-font") : "M"));
   const [epoch, setEpoch] = useState(0); // bumped by Reset: remounts the pages, so the diagram boxes and form fields start over
@@ -95,6 +106,7 @@ export default function App() {
           theme={{ value: theme === "system" ? "auto" : theme, onChange: (v) => setTheme(v === "auto" ? "system" : v) }}
           fontSize={{ value: fontStep, onChange: setFontStep }}
           present={{ active: presenter, onToggle: () => setPresenter((v) => !v), label: "Presenter (P)" }}
+          talkTrack={{ active: talkOpen, onToggle: () => setTalkOpen((v) => !v) }}
           help={{ href: "https://github.com/curtismu7/mock-authorize-LAB#readme" }}
           version={LAB_VERSION}
           onReset={reset}
@@ -120,6 +132,8 @@ export default function App() {
           {page === "connect" && <Connect />}
           {page === "diagram" && <Diagram theme={theme} />}
         </React.Fragment>
+      <TalkTrackDialog isOpen={talkOpen} onClose={() => setTalkOpen(false)} talk={talkSteps} />
+
       </main>
     </div>
   );
