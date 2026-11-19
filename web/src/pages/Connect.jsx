@@ -13,7 +13,7 @@ export default function Connect() {
 
   return (
     <>
-      <h2>Connect a client</h2>
+      <h2><span className="step-num" aria-hidden="true" data-n="4"></span>Connect a client</h2>
       <p className="lede">This server answers like PingOne Authorize: a worker token, a list of decision endpoints, decisions, and recent decisions. Point a client at it and run its normal flow with no tenant.</p>
       <div className="card">
         <h3>In the P1AZ Inspector (Settings page)</h3>

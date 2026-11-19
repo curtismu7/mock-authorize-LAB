@@ -46,7 +46,12 @@ textarea { font-family: var(--font-mono); font-size: 13px; }
 .ok { padding: 8px 12px; border-radius: 8px; background: var(--surface-2); color: var(--status-ok); border: 1px solid var(--status-ok); }
 .controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 20px; }
 .controls label, .fields label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
-.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 224px), 1fr)); gap: 12px; margin: 12px 0; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media (max-width: 900px) { .fields { grid-template-columns: 1fr; } }
+.step-num { display: inline-grid; place-items: center; min-width: 22px; height: 22px; border-radius: 999px;
+  background: var(--accent-gradient); color: var(--on-accent); font: 700 13px var(--font-mono);
+  margin-right: 8px; vertical-align: 2px; }
+.step-num::before { content: attr(data-n); }
 .fields > * { min-width: 0; }
 .fields label.check { flex-direction: row; align-items: center; gap: 8px; color: var(--text); }
 

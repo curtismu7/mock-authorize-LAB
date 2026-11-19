@@ -39,7 +39,7 @@ export default function Rules() {
 
   return (
     <>
-      <h2>Rules</h2>
+      <h2><span className="step-num" aria-hidden="true" data-n="1"></span>Rules</h2>
       <p className="lede">The policy this server decides by. Change a rule, save, and the very next decision follows it, whether it comes from the Try page or from a client calling the PingOne-shaped API.</p>
       <form className="card" onSubmit={save}>
         <div className="fields">

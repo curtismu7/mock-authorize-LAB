@@ -7,6 +7,7 @@ COPY server/package.json server/
 COPY web/package.json web/
 RUN npm ci --ignore-scripts
 COPY web web
+COPY docs docs
 COPY content content
 RUN npm run build -w web
 

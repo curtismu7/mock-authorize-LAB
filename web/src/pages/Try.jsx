@@ -31,7 +31,7 @@ export default function Try() {
 
   return (
     <>
-      <h2>Try a decision</h2>
+      <h2><span className="step-num" aria-hidden="true" data-n="2"></span>Try a decision</h2>
       <p className="lede">Send a request and see the verdict, the statements, and PingOne's answer shape. Edit the rules first to watch the answer change.</p>
       <div className="card">
         <div className="seg" role="group" aria-label="Decision type">
