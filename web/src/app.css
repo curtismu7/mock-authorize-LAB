@@ -97,3 +97,12 @@ textarea { font-family: var(--font-mono); font-size: 13px; }
 
 @media (max-width: 900px) { .split { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) { .flow-wrap { height: 384px; } .shell-bar { padding: 10px 16px; } .shell-nav { order: 3; flex-basis: 100%; } }
+
+/* An expanded box (diagram kit §8c): give it a width the details can be read at. */
+.react-flow__node.dk-open {
+  width: 320px;
+}
+.react-flow__node.dk-open .fbox {
+  max-height: 420px;
+  overflow-y: auto;
+}
