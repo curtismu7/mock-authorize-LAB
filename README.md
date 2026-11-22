@@ -97,7 +97,14 @@ npm run reset    # POST /api/reset on the running app: rules to defaults, decisi
 
 `GET /api/health` returns `demo-health/1`. The page's Reset session button does the same and also puts the diagram boxes back. Reset keeps the worker credentials on purpose: rotating them would silently break a client you pasted them into (use Rotate for that). `npm run talk-track` regenerates `docs/talk-track.md` and `npm run content-pack` regenerates `content-pack.json`; both are generated, so do not edit them by hand.
 
-## Postman collection
+## MCP server
+
+`mcp/server.mjs` is a stdio MCP server proxying a running lab as nine tools: `mockaz_health`, `mockaz_info`, `mockaz_worker_credentials`, `mockaz_token` (PingFederate-shaped client_credentials with Basic auth), `mockaz_decision_endpoints`, `mockaz_decide` (permit/deny/indeterminate through the rules), `mockaz_pap_decision` (the tokenless PAP route), `mockaz_rules` and `mockaz_decisions_log`. It holds no state of its own; point it at the lab with `MOCKAZ_LAB_BASE` (default `http://localhost:4850`):
+
+```
+npm install --prefix mcp
+MOCKAZ_LAB_BASE=http://localhost:4850 node mcp/server.mjs
+```
 
 `postman/mock-authorize-lab.postman_collection.json` drives the whole mock surface without the UI: the worker credentials feed the PingFederate-shaped token endpoint (Basic auth, chained via collection variables), the PingOne-shaped decision endpoints run permit/deny/indeterminate through the rules, the direct PAP decision route needs no token, and the rules/decision-log routes round it out. The collection needs no environment: everything is a labelled mock and the lab has no live mode.
 
