@@ -97,6 +97,15 @@ npm run reset    # POST /api/reset on the running app: rules to defaults, decisi
 
 `GET /api/health` returns `demo-health/1`. The page's Reset session button does the same and also puts the diagram boxes back. Reset keeps the worker credentials on purpose: rotating them would silently break a client you pasted them into (use Rotate for that). `npm run talk-track` regenerates `docs/talk-track.md` and `npm run content-pack` regenerates `content-pack.json`; both are generated, so do not edit them by hand.
 
+## Postman collection
+
+`postman/mock-authorize-lab.postman_collection.json` drives the whole mock surface without the UI: the worker credentials feed the PingFederate-shaped token endpoint (Basic auth, chained via collection variables), the PingOne-shaped decision endpoints run permit/deny/indeterminate through the rules, the direct PAP decision route needs no token, and the rules/decision-log routes round it out. The collection needs no environment: everything is a labelled mock and the lab has no live mode.
+
+```
+node ../../shared/postman/generator.mjs --spec postman/spec.json            # regenerate (never hand-edit the output)
+npx newman run postman/mock-authorize-lab.postman_collection.json
+```
+
 ## Docker (optional)
 
 ```

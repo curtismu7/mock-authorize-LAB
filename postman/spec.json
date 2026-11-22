@@ -1,0 +1,211 @@
+{
+  "name": "Mock Authorize LAB",
+  "slug": "mock-authorize-lab",
+  "description": "API collection for Mock Authorize LAB: the lab is itself a mock PingOne Authorize/PingFederate-shaped server. Get the mock worker token (client_credentials), call the decision endpoints directly and through the PingOne-shaped /pingone surface, read and edit the rule set, and browse the decision log. Everything is a labelled mock; the lab has no live mode.",
+  "baseUrl": "http://localhost:4850",
+  "env": {},
+  "variables": {
+    "ENV_ID": "db67be8c"
+  },
+  "folders": [
+    {
+      "name": "Sanity (mock, labelled)",
+      "description": "Health, mode info (always mock: the lab is itself the mock server) and the endpoint/rule catalog.",
+      "requests": [
+        {
+          "name": "Health",
+          "method": "GET",
+          "path": "/api/health",
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().state).to.eql('ready');"
+          ]
+        },
+        {
+          "name": "Info (mode is mock by design)",
+          "method": "GET",
+          "path": "/api/info",
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().mode).to.eql('mock');",
+            "pm.expect(pm.response.json().simulated).to.eql(true);"
+          ]
+        },
+        {
+          "name": "Config (endpoints and default rules)",
+          "method": "GET",
+          "path": "/api/config",
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().endpoints.length).to.be.above(0);"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Worker token",
+      "description": "The mock worker credentials, then the PingFederate-shaped token endpoint. The token is chained into the following folders via the WORKER_TOKEN collection variable.",
+      "requests": [
+        {
+          "name": "Mock worker credentials",
+          "method": "GET",
+          "path": "/api/worker",
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "const b = pm.response.json(); pm.expect(b.clientId).to.be.a('string');",
+            "pm.collectionVariables.set('WORKER_SECRET', b.clientSecret);",
+            "pm.collectionVariables.set('BASIC_AUTH', Buffer.from(b.clientId + ':' + b.clientSecret).toString('base64'));"
+          ]
+        },
+        {
+          "name": "Token (client_credentials, Basic auth)",
+          "method": "POST",
+          "path": "/pingone/auth/{{ENV_ID}}/as/token",
+          "headers": {
+            "Authorization": "Basic {{BASIC_AUTH}}"
+          },
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "client_credentials"
+            }
+          ],
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "const b = pm.response.json(); pm.expect(b.access_token).to.be.a('string');",
+            "pm.collectionVariables.set('WORKER_TOKEN', b.access_token);"
+          ]
+        },
+        {
+          "name": "Token with a wrong secret (negative)",
+          "method": "POST",
+          "path": "/pingone/auth/{{ENV_ID}}/as/token",
+          "headers": {
+            "Authorization": "Basic bW9jay13b3JrZXI6d3Jvbmctc2VjcmV0"
+          },
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "client_credentials"
+            }
+          ],
+          "tests": [
+            "pm.expect(pm.response.code).to.eql(401);",
+            "pm.expect(pm.response.json().error).to.eql('invalid_client');"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Decisions (PingOne-shaped surface)",
+      "description": "Decision endpoints under /pingone/api/v1/environments with the worker token, plus the direct PAP decision route that needs no token.",
+      "requests": [
+        {
+          "name": "List decision endpoints",
+          "method": "GET",
+          "path": "/pingone/api/v1/environments/{{ENV_ID}}/decisionEndpoints",
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json()._embedded.decisionEndpoints.length).to.be.above(0);"
+          ],
+          "headers": {
+            "Authorization": "Bearer {{WORKER_TOKEN}}"
+          }
+        },
+        {
+          "name": "Permit decision (purchase of 150)",
+          "method": "POST",
+          "path": "/pingone/api/v1/environments/{{ENV_ID}}/decisionEndpoints/mock-transaction",
+          "body": {
+            "parameters": {
+              "Amount": 150,
+              "TransactionType": "purchase"
+            }
+          },
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().decision).to.eql('PERMIT');"
+          ],
+          "headers": {
+            "Authorization": "Bearer {{WORKER_TOKEN}}"
+          }
+        },
+        {
+          "name": "Deny decision (over the limit)",
+          "method": "POST",
+          "path": "/pingone/api/v1/environments/{{ENV_ID}}/decisionEndpoints/mock-transaction",
+          "body": {
+            "parameters": {
+              "Amount": 5000,
+              "TransactionType": "purchase"
+            }
+          },
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().decision).to.eql('DENY');"
+          ],
+          "headers": {
+            "Authorization": "Bearer {{WORKER_TOKEN}}"
+          }
+        },
+        {
+          "name": "Indeterminate (missing attributes, negative)",
+          "method": "POST",
+          "path": "/pingone/api/v1/environments/{{ENV_ID}}/decisionEndpoints/mock-transaction",
+          "body": {
+            "parameters": {}
+          },
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().decision).to.eql('INDETERMINATE');"
+          ],
+          "headers": {
+            "Authorization": "Bearer {{WORKER_TOKEN}}"
+          }
+        },
+        {
+          "name": "Direct PAP decision (no token)",
+          "method": "POST",
+          "path": "/governance/pap/alpha/policy/mock-policy/decision",
+          "body": {
+            "parameters": {
+              "Amount": 150,
+              "TransactionType": "purchase"
+            }
+          },
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json()).to.have.property('correlationId');"
+          ],
+          "headers": {
+            "Authorization": "Bearer {{WORKER_TOKEN}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rules and log",
+      "description": "Read and reset the rule set, browse and clear the decision log.",
+      "requests": [
+        {
+          "name": "Current rules",
+          "method": "GET",
+          "path": "/api/rules",
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json()).to.have.property('defaults');"
+          ]
+        },
+        {
+          "name": "Decision log",
+          "method": "GET",
+          "path": "/api/decisions",
+          "tests": [
+            "pm.response.to.have.status(200);",
+            "pm.expect(pm.response.json().decisions).to.be.an('array');"
+          ]
+        }
+      ]
+    }
+  ]
+}
