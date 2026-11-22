@@ -1,0 +1,582 @@
+{
+  "info": {
+    "name": "Mock Authorize LAB",
+    "description": "API collection for Mock Authorize LAB: the lab is itself a mock PingOne Authorize/PingFederate-shaped server. Get the mock worker token (client_credentials), call the decision endpoints directly and through the PingOne-shaped /pingone surface, read and edit the rule set, and browse the decision log. Everything is a labelled mock; the lab has no live mode.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "8d26b4cb-71b9-4025-83d1-092008e03448"
+  },
+  "item": [
+    {
+      "name": "Sanity (mock, labelled)",
+      "description": "Health, mode info (always mock: the lab is itself the mock server) and the endpoint/rule catalog.",
+      "item": [
+        {
+          "name": "Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().state).to.eql('ready');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{LAB_BASE}}/api/health",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Info (mode is mock by design)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().mode).to.eql('mock');",
+                  "pm.expect(pm.response.json().simulated).to.eql(true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{LAB_BASE}}/api/info",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "info"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Config (endpoints and default rules)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().endpoints.length).to.be.above(0);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{LAB_BASE}}/api/config",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "config"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Worker token",
+      "description": "The mock worker credentials, then the PingFederate-shaped token endpoint. The token is chained into the following folders via the WORKER_TOKEN collection variable.",
+      "item": [
+        {
+          "name": "Mock worker credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "const b = pm.response.json(); pm.expect(b.clientId).to.be.a('string');",
+                  "pm.collectionVariables.set('WORKER_SECRET', b.clientSecret);",
+                  "pm.collectionVariables.set('BASIC_AUTH', Buffer.from(b.clientId + ':' + b.clientSecret).toString('base64'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{LAB_BASE}}/api/worker",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "worker"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Token (client_credentials, Basic auth)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "const b = pm.response.json(); pm.expect(b.access_token).to.be.a('string');",
+                  "pm.collectionVariables.set('WORKER_TOKEN', b.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic {{BASIC_AUTH}}"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/pingone/auth/{{ENV_ID}}/as/token",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "pingone",
+                "auth",
+                "{{ENV_ID}}",
+                "as",
+                "token"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Token with a wrong secret (negative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.expect(pm.response.code).to.eql(401);",
+                  "pm.expect(pm.response.json().error).to.eql('invalid_client');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic bW9jay13b3JrZXI6d3Jvbmctc2VjcmV0"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/pingone/auth/{{ENV_ID}}/as/token",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "pingone",
+                "auth",
+                "{{ENV_ID}}",
+                "as",
+                "token"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Decisions (PingOne-shaped surface)",
+      "description": "Decision endpoints under /pingone/api/v1/environments with the worker token, plus the direct PAP decision route that needs no token.",
+      "item": [
+        {
+          "name": "List decision endpoints",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json()._embedded.decisionEndpoints.length).to.be.above(0);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{WORKER_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{LAB_BASE}}/pingone/api/v1/environments/{{ENV_ID}}/decisionEndpoints",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "pingone",
+                "api",
+                "v1",
+                "environments",
+                "{{ENV_ID}}",
+                "decisionEndpoints"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Permit decision (purchase of 150)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().decision).to.eql('PERMIT');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{WORKER_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parameters\": {\n    \"Amount\": 150,\n    \"TransactionType\": \"purchase\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/pingone/api/v1/environments/{{ENV_ID}}/decisionEndpoints/mock-transaction",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "pingone",
+                "api",
+                "v1",
+                "environments",
+                "{{ENV_ID}}",
+                "decisionEndpoints",
+                "mock-transaction"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Deny decision (over the limit)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().decision).to.eql('DENY');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{WORKER_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parameters\": {\n    \"Amount\": 5000,\n    \"TransactionType\": \"purchase\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/pingone/api/v1/environments/{{ENV_ID}}/decisionEndpoints/mock-transaction",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "pingone",
+                "api",
+                "v1",
+                "environments",
+                "{{ENV_ID}}",
+                "decisionEndpoints",
+                "mock-transaction"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Indeterminate (missing attributes, negative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().decision).to.eql('INDETERMINATE');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{WORKER_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parameters\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/pingone/api/v1/environments/{{ENV_ID}}/decisionEndpoints/mock-transaction",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "pingone",
+                "api",
+                "v1",
+                "environments",
+                "{{ENV_ID}}",
+                "decisionEndpoints",
+                "mock-transaction"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Direct PAP decision (no token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json()).to.have.property('correlationId');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{WORKER_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parameters\": {\n    \"Amount\": 150,\n    \"TransactionType\": \"purchase\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{LAB_BASE}}/governance/pap/alpha/policy/mock-policy/decision",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "governance",
+                "pap",
+                "alpha",
+                "policy",
+                "mock-policy",
+                "decision"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rules and log",
+      "description": "Read and reset the rule set, browse and clear the decision log.",
+      "item": [
+        {
+          "name": "Current rules",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json()).to.have.property('defaults');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{LAB_BASE}}/api/rules",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "rules"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Decision log",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Assertions for this request */",
+                  "pm.response.to.have.status(200);",
+                  "pm.expect(pm.response.json().decisions).to.be.an('array');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{LAB_BASE}}/api/decisions",
+              "host": [
+                "{{LAB_BASE}}"
+              ],
+              "path": [
+                "api",
+                "decisions"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "LAB_BASE",
+      "value": "http://localhost:4850"
+    },
+    {
+      "key": "ENV_ID",
+      "value": "db67be8c"
+    }
+  ]
+}
