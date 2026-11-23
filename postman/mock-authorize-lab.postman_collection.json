@@ -3,7 +3,7 @@
     "name": "Mock Authorize LAB",
     "description": "API collection for Mock Authorize LAB: the lab is itself a mock PingOne Authorize/PingFederate-shaped server. Get the mock worker token (client_credentials), call the decision endpoints directly and through the PingOne-shaped /pingone surface, read and edit the rule set, and browse the decision log. Everything is a labelled mock; the lab has no live mode.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_postman_id": "8d26b4cb-71b9-4025-83d1-092008e03448"
+    "_postman_id": "postman-mock-authorize-lab"
   },
   "item": [
     {
