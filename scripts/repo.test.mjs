@@ -112,7 +112,7 @@ test('only .example and .invalid hosts and the fixture environment id appear in 
     const t = read(path.relative(root, p));
     for (const m of t.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)) {
       const h = m[1].toLowerCase();
-      if (!(/\.(example|invalid)$/.test(h) || ['127.0.0.1', 'localhost', 'github.com', 'json-schema.org', 'www.w3.org', 'registry.npmjs.org', 'host.docker.internal', 'local.ping-devops.com'].includes(h))) hits.push(`${path.relative(root, p)}: ${h}`);
+      if (!(/\.(example|invalid)$/.test(h) || ['127.0.0.1', 'localhost', 'github.com', 'json-schema.org', 'www.w3.org', 'registry.npmjs.org', 'host.docker.internal', 'local.ping-devops.com', 'schema.getpostman.com'].includes(h))) hits.push(`${path.relative(root, p)}: ${h}`);
     }
     for (const m of t.matchAll(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g)) {
       if (m[0] !== '00000000-0000-4000-8000-000000000000') hits.push(`${path.relative(root, p)}: uuid ${m[0]}`);
