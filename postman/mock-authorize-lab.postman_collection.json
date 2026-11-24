@@ -18,9 +18,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().state).to.eql('ready');"
+                  "pm.test(\"Health\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().state).to.eql('ready');",
+                  "});"
                 ]
               }
             }
@@ -50,10 +51,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().mode).to.eql('mock');",
-                  "pm.expect(pm.response.json().simulated).to.eql(true);"
+                  "pm.test(\"Info (mode is mock by design)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().mode).to.eql('mock');",
+                  "  pm.expect(pm.response.json().simulated).to.eql(true);",
+                  "});"
                 ]
               }
             }
@@ -83,9 +85,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().endpoints.length).to.be.above(0);"
+                  "pm.test(\"Config (endpoints and default rules)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().endpoints.length).to.be.above(0);",
+                  "});"
                 ]
               }
             }
@@ -121,11 +124,12 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "const b = pm.response.json(); pm.expect(b.clientId).to.be.a('string');",
-                  "pm.collectionVariables.set('WORKER_SECRET', b.clientSecret);",
-                  "pm.collectionVariables.set('BASIC_AUTH', Buffer.from(b.clientId + ':' + b.clientSecret).toString('base64'));"
+                  "pm.test(\"Mock worker credentials\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const b = pm.response.json(); pm.expect(b.clientId).to.be.a('string');",
+                  "  pm.collectionVariables.set('WORKER_SECRET', b.clientSecret);",
+                  "  pm.collectionVariables.set('BASIC_AUTH', Buffer.from(b.clientId + ':' + b.clientSecret).toString('base64'));",
+                  "});"
                 ]
               }
             }
@@ -155,10 +159,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "const b = pm.response.json(); pm.expect(b.access_token).to.be.a('string');",
-                  "pm.collectionVariables.set('WORKER_TOKEN', b.access_token);"
+                  "pm.test(\"Token (client_credentials, Basic auth)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  const b = pm.response.json(); pm.expect(b.access_token).to.be.a('string');",
+                  "  pm.collectionVariables.set('WORKER_TOKEN', b.access_token);",
+                  "});"
                 ]
               }
             }
@@ -205,9 +210,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.expect(pm.response.code).to.eql(401);",
-                  "pm.expect(pm.response.json().error).to.eql('invalid_client');"
+                  "pm.test(\"Token with a wrong secret (negative)\", function () {",
+                  "  pm.expect(pm.response.code).to.eql(401);",
+                  "  pm.expect(pm.response.json().error).to.eql('invalid_client');",
+                  "});"
                 ]
               }
             }
@@ -260,9 +266,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json()._embedded.decisionEndpoints.length).to.be.above(0);"
+                  "pm.test(\"List decision endpoints\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json()._embedded.decisionEndpoints.length).to.be.above(0);",
+                  "});"
                 ]
               }
             }
@@ -301,9 +308,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().decision).to.eql('PERMIT');"
+                  "pm.test(\"Permit decision (purchase of 150)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().decision).to.eql('PERMIT');",
+                  "});"
                 ]
               }
             }
@@ -352,9 +360,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().decision).to.eql('DENY');"
+                  "pm.test(\"Deny decision (over the limit)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().decision).to.eql('DENY');",
+                  "});"
                 ]
               }
             }
@@ -403,9 +412,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().decision).to.eql('INDETERMINATE');"
+                  "pm.test(\"Indeterminate (missing attributes, negative)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().decision).to.eql('INDETERMINATE');",
+                  "});"
                 ]
               }
             }
@@ -454,9 +464,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json()).to.have.property('correlationId');"
+                  "pm.test(\"Direct PAP decision (no token)\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json()).to.have.property('correlationId');",
+                  "});"
                 ]
               }
             }
@@ -510,9 +521,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json()).to.have.property('defaults');"
+                  "pm.test(\"Current rules\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json()).to.have.property('defaults');",
+                  "});"
                 ]
               }
             }
@@ -542,9 +554,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "/* Assertions for this request */",
-                  "pm.response.to.have.status(200);",
-                  "pm.expect(pm.response.json().decisions).to.be.an('array');"
+                  "pm.test(\"Decision log\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().decisions).to.be.an('array');",
+                  "});"
                 ]
               }
             }

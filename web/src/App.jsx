@@ -102,6 +102,7 @@ export default function App() {
           ))}
         </nav>
         <TopMenu
+          postman={{ repo: "curtismu7/mock-authorize-LAB", slug: "mock-authorize-lab" }}
           mode={{ value: mode, onChange: pickMode, realAvailable: info ? info.realAvailable : null, realHint: info?.realReason || LIVE_FALLBACK }}
           theme={{ value: theme === "system" ? "auto" : theme, onChange: (v) => setTheme(v === "auto" ? "system" : v) }}
           fontSize={{ value: fontStep, onChange: setFontStep }}
